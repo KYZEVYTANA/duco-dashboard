@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>DUCO Dashboard</title>
+  <style>
+    body { background: #111; color: #eee; font-family: sans-serif; }
+    input, button { padding: 5px; margin: 5px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+    th, td { border: 1px solid #555; padding: 5px; text-align: center; }
+    th { background: #222; }
+  </style>
+</head>
+<body>
+  <h2>DuinoCoin Dashboard</h2>
+  <input id="username" placeholder="Введите DUCO логин">
+  <button onclick="loadData()">Загрузить</button>
+
+  <p>Баланс: <span id="balance">—</span> DUCO</p>
+  <table>
+    <thead>
+      <tr>
+        <th>Устройство</th>
+        <th>Софт</th>
+        <th>Хэши</th>
+        <th>Принято</th>
+        <th>Отклонено</th>
+        <th>Последний share</th>
+      </tr>
+    </thead>
+    <tbody id="miners"></tbody>
+  </table>
+
+  <script>
+    const PROXY = "https://duco-proxy.onrender.com"; // твой сервер
+
+    async function loadData() {
+      const username = document.getElementById("username").value.trim();
+      if (!username) {
+        alert("Введите логин!");
+        return;
+      }
+
+      try {
+        const res = await fetch(`${PROXY}/duco/${username}`);
+        if (!res.ok) throw new Error("Ответ прокси не OK");
+
+        const data = await res.json();
+        if (!data.result || !data.result.balance) {
+          alert("Ошибка данных от API");
+          return;
+        }
+
+        // Баланс
+        document.getElementById("balance").innerText =
+          data.result.balance.balance.toFixed(2);
+
+        // Майнеры
+        const minersTable = document.getElementById("miners");
+        minersTable.innerHTML = "";
+        (data.result.miners || []).forEach(m => {
+          minersTable.innerHTML += `
+            <tr>
+              <td>${m.identifier}</td>
+              <td>${m.software}</td>
+              <td>${m.hashrate}</td>
+              <td>${m.accepted}</td>
+              <td>${m.rejected}</td>
+              <td>${m.lastShare}</td>
+            </tr>`;
+        });
+
+      } catch (err) {
+        console.error("Ошибка фронта:", err);
+        alert("Ошибка соединения с прокси");
+      }
+    }
+
+    // автообновление каждые 30 сек
+    setInterval(() => {
+      if (document.getElementById("username").value.trim()) {
+        loadData();
+      }
+    }, 30000);
+  </script>
+</body>
+</html>
