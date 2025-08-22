@@ -3,73 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <title>DuinoCoin — дашборд</title>
-  <style>
-    body {
-      background: #0d1117;
-      color: #fff;
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background: #161b22;
-      padding: 15px;
-      text-align: center;
-      font-size: 24px;
-      font-weight: bold;
-    }
-    .container {
-      max-width: 1000px;
-      margin: auto;
-      padding: 20px;
-    }
-    .stats {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
-      margin-bottom: 20px;
-    }
-    .card {
-      background: #1c2128;
-      padding: 15px;
-      border-radius: 8px;
-      flex: 1;
-      min-width: 200px;
-      text-align: center;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-    th, td {
-      border: 1px solid #30363d;
-      padding: 8px;
-      text-align: center;
-    }
-    th {
-      background: #21262d;
-    }
-    input, button {
-      padding: 8px;
-      margin: 5px;
-      border-radius: 5px;
-      border: none;
-    }
-    button {
-      background: #238636;
-      color: white;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #2ea043;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header>DuinoCoin — дашборд</header>
   <div class="container">
-    <div>
+    <div class="user-input">
       <label for="username">Ваш DUCO логин</label>
       <input type="text" id="username" value="kyzevytana">
       <button onclick="loadData()">Показать</button>
@@ -97,7 +36,7 @@
       </thead>
       <tbody id="miners"></tbody>
     </table>
-    <p>Данные из публичного API DuinoCoin. Обновление каждые 30 секунд.</p>
+    <p class="footer">Данные из публичного API DuinoCoin. Обновление каждые 30 секунд.</p>
   </div>
 
   <script>
@@ -107,7 +46,6 @@
       const username = document.getElementById("username").value;
 
       try {
-        // Запрос к DuinoCoin API через твой прокси
         const res = await fetch(`${PROXY}/users/${username}`);
         const data = await res.json();
 
@@ -121,13 +59,11 @@
 
         document.getElementById("balance").innerText = user.balance.toFixed(2);
 
-        // Конвертация в рубли
         const priceRes = await fetch(`${PROXY}/exchange/DUCO/RUB`);
         const priceData = await priceRes.json();
         const price = priceData.result || 0;
         document.getElementById("balanceRUB").innerText = (user.balance * price).toFixed(2);
 
-        // Минеры
         let totalHashrate = 0;
         let active = 0;
 
@@ -163,7 +99,6 @@
       }
     }
 
-    // автообновление каждые 30 сек
     setInterval(loadData, 30000);
   </script>
 </body>
