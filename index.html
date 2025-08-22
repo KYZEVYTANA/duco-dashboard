@@ -1,108 +1,170 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>DuinoCoin — мой баланс и майнеры</title>
+  <meta charset="UTF-8">
+  <title>DuinoCoin — дашборд</title>
   <style>
-    :root { --bg:#0f1220; --panel:#171a2b; --text:#e8ecff; --muted:#9aa3c7; --ok:#54d18c; --warn:#ffcc66; --bad:#ff6b6b; }
-    * { box-sizing: border-box }
-    body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Inter,Arial; color:var(--text); background:linear-gradient(180deg,#0b0e1a, var(--bg)); }
-    header { padding:20px; display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
-    h1 { font-size:20px; margin:0; letter-spacing:.3px }
-    .card { background:var(--panel); border:1px solid #232640; border-radius:14px; padding:16px; }
-    .grid { display:grid; gap:14px; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); }
-    label { font-size:13px; color:var(--muted); display:block; margin-bottom:6px }
-    input[type="text"] { width:100%; padding:10px 12px; border-radius:10px; border:1px solid #2a2e4b; background:#0e1130; color:var(--text); }
-    button { padding:10px 14px; border-radius:10px; background:#2a2eff; color:#fff; border:none; cursor:pointer; font-weight:600 }
-    button:disabled { opacity:.6; cursor:default }
-    .stats { display:flex; gap:12px; flex-wrap:wrap }
-    .stat { flex:1 1 180px; background:#10132b; border:1px solid #212650; border-radius:12px; padding:12px }
-    .stat .label { font-size:12px; color:var(--muted) }
-    .stat .value { font-size:22px; margin-top:6px }
-    .time { color:var(--muted); font-size:12px }
-    table { width:100%; border-collapse:collapse; }
-    th, td { padding:10px 8px; border-bottom:1px solid #232640; text-align:left; font-size:14px }
-    th { color:var(--muted); font-weight:600; position:sticky; top:0; background:var(--panel) }
-    .pill { padding:3px 8px; border-radius:999px; font-size:12px; display:inline-block }
-    .ok { background:rgba(84,209,140,.15); color:var(--ok); border:1px solid rgba(84,209,140,.35) }
-    .bad { background:rgba(255,107,107,.12); color:var(--bad); border:1px solid rgba(255,107,107,.35) }
-    .warn{ background:rgba(255,204,102,.12); color:var(--warn); border:1px solid rgba(255,204,102,.35) }
-    .right { text-align:right }
-    .footer { padding:16px; text-align:center; color:var(--muted); font-size:12px }
-    .wrap { max-width:1100px; margin:0 auto; padding:14px }
-    .error { color:var(--bad); font-size:14px; margin-top:8px }
-    .sr { position:absolute; left:-9999px }
+    body {
+      background: #0d1117;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #161b22;
+      padding: 15px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+    }
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      padding: 20px;
+    }
+    .stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .card {
+      background: #1c2128;
+      padding: 15px;
+      border-radius: 8px;
+      flex: 1;
+      min-width: 200px;
+      text-align: center;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #30363d;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background: #21262d;
+    }
+    input, button {
+      padding: 8px;
+      margin: 5px;
+      border-radius: 5px;
+      border: none;
+    }
+    button {
+      background: #238636;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #2ea043;
+    }
   </style>
 </head>
 <body>
-  <header class="wrap">
-    <h1>DuinoCoin — дашборд</h1>
-    <div style="display:flex; gap:10px; align-items:flex-end; flex:1; max-width:560px">
-      <div style="flex:1">
-        <label for="username">Ваш DUCO логин</label>
-        <input id="username" type="text" placeholder="например, revox" autocomplete="username" />
-      </div>
-      <div>
-        <button id="applyBtn" type="button">Показать</button>
-      </div>
+  <header>DuinoCoin — дашборд</header>
+  <div class="container">
+    <div>
+      <label for="username">Ваш DUCO логин</label>
+      <input type="text" id="username" value="kyzevytana">
+      <button onclick="loadData()">Показать</button>
     </div>
-    <div class="time" id="meta">—</div>
-  </header>
 
-  <main class="wrap">
-    <section class="grid" style="margin-bottom:12px">
-      <div class="card">
-        <div class="stats">
-          <div class="stat">
-            <div class="label">Баланс</div>
-            <div class="value" id="balance">—</div>
-          </div>
-          <div class="stat">
-            <div class="label">Суммарный хэшрейт</div>
-            <div class="value" id="totalHash">—</div>
-          </div>
-          <div class="stat">
-            <div class="label">Активных майнеров</div>
-            <div class="value" id="activeMiners">—</div>
-          </div>
-          <div class="stat">
-            <div class="label">Общее количество майнеров</div>
-            <div class="value" id="minersCount">—</div>
-          </div>
-        </div>
-        <div id="error" class="error" role="alert" aria-live="polite"></div>
-      </div>
-    </section>
+    <div class="stats">
+      <div class="card">Баланс: <span id="balance">—</span> DUCO (<span id="balanceRUB">—</span> ₽)</div>
+      <div class="card">Суммарный хэшрейт: <span id="hashrate">—</span></div>
+      <div class="card">Активных майнеров: <span id="activeMiners">—</span></div>
+      <div class="card">Всего майнеров: <span id="totalMiners">—</span></div>
+    </div>
 
-    <section class="card">
-      <h2 class="sr">Майнеры</h2>
-      <div style="overflow:auto; max-height:65vh">
-        <table id="minersTable">
-          <thead>
+    <table>
+      <thead>
+        <tr>
+          <th>Имя устройства</th>
+          <th>Платформа</th>
+          <th>Хэшрейт</th>
+          <th>Принято (шары)</th>
+          <th>Сложность</th>
+          <th>Версия</th>
+          <th>Статус</th>
+          <th>Последний отклик</th>
+        </tr>
+      </thead>
+      <tbody id="miners"></tbody>
+    </table>
+    <p>Данные из публичного API DuinoCoin. Обновление каждые 30 секунд.</p>
+  </div>
+
+  <script>
+    const PROXY = "https://duco-proxy.onrender.com"; // твой сервер
+
+    async function loadData() {
+      const username = document.getElementById("username").value;
+
+      try {
+        // Запрос к DuinoCoin API через твой прокси
+        const res = await fetch(`${PROXY}/users/${username}`);
+        const data = await res.json();
+
+        if (!data.success) {
+          alert("Ошибка загрузки данных");
+          return;
+        }
+
+        const user = data.result.balance;
+        const miners = data.result.miners;
+
+        document.getElementById("balance").innerText = user.balance.toFixed(2);
+
+        // Конвертация в рубли
+        const priceRes = await fetch(`${PROXY}/exchange/DUCO/RUB`);
+        const priceData = await priceRes.json();
+        const price = priceData.result || 0;
+        document.getElementById("balanceRUB").innerText = (user.balance * price).toFixed(2);
+
+        // Минеры
+        let totalHashrate = 0;
+        let active = 0;
+
+        const tbody = document.getElementById("miners");
+        tbody.innerHTML = "";
+
+        miners.forEach(m => {
+          totalHashrate += m.hashrate;
+          if (m.status === "ONLINE") active++;
+
+          const row = `
             <tr>
-              <th>Имя устройства</th>
-              <th>Платформа</th>
-              <th class="right">Хэшрейт</th>
-              <th class="right">Принято (шары)</th>
-              <th>Сложность</th>
-              <th>Версия</th>
-              <th>Статус</th>
-              <th>Последний отклик</th>
+              <td>${m.identifier}</td>
+              <td>${m.software}</td>
+              <td>${m.hashrate.toFixed(2)} H/s</td>
+              <td>${m.accepted}</td>
+              <td>${m.difficulty}</td>
+              <td>${m.version}</td>
+              <td>${m.status}</td>
+              <td>${m.lastShare} сек назад</td>
             </tr>
-          </thead>
-          <tbody id="minersBody">
-            <tr><td colspan="8">Укажите логин и нажмите «Показать»</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-  </main>
+          `;
+          tbody.innerHTML += row;
+        });
 
-  <div class="footer">Данные из публичного API DuinoCoin. Обновление каждые 30 секунд.</div>
+        document.getElementById("hashrate").innerText = totalHashrate.toFixed(2) + " H/s";
+        document.getElementById("activeMiners").innerText = active;
+        document.getElementById("totalMiners").innerText = miners.length;
 
-<script>
-// Тут внутри идёт весь JavaScript из прошлой версии, включая конвертацию в рубли
-</script>
+      } catch (e) {
+        console.error(e);
+        alert("Ошибка соединения с API");
+      }
+    }
+
+    // автообновление каждые 30 сек
+    setInterval(loadData, 30000);
+  </script>
 </body>
 </html>
